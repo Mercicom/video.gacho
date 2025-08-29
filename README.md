@@ -1,15 +1,50 @@
-# Ansh & Riley Full-Stack Template
+# Video Analyzer (Gemini)
 
-This is a full-stack template project for Software Composers to create  applications with AI.
+Analyze videos locally to extract:
+- Visual Hook, Text Hook, Voice Hook
+- Full spoken script transcript
+- Key pain point
 
-## Getting started
-To create a new project, you go to `/paths`, choose from our list of Paths, and then use Cursor's Composer feature to quickly scaffold your project!
+Built with Next.js 14 (App Router) and Google Gemini. No AI or dev knowledge required.
 
-You can also edit the Path's prompt template to be whatever you like!
+## Quick Start
 
-## Technologies used
-This doesn't really matter, but is useful for the AI to understand more about this project. We are using the following technologies
-- React with Next.js 14 App Router
+1) Fork this repo to your GitHub account
+2) Clone your fork to your computer
+3) Install Node.js LTS (18+): https://nodejs.org
+4) Get a free Google Gemini API key: https://aistudio.google.com/app/apikey
+5) In the project folder, run:
+
+```
+npm install
+npm run setup   # this asks for your Gemini API key and creates .env.local
+npm run dev
+```
+
+6) Open http://localhost:3000/video-analyzer
+
+That’s it. Upload video files and click Analyze.
+
+## Environment Variables
+
+Only one is required to run the Video Analyzer:
+- `GOOGLE_API_KEY` – your Gemini API key
+
+You can also set optional limits (defaults shown):
+- `RATE_LIMIT_PER_MINUTE=10`
+- `MAX_VIDEO_SIZE_MB=100`
+- `MAX_VIDEOS_PER_BATCH=50`
+
+See `.env.example` for a full list (other providers are optional and not needed for video analysis).
+
+## Troubleshooting
+
+- Missing API key: Run `npm run setup` again or create `.env.local` manually using `.env.example` as a template.
+- Rate limit errors: The tool automatically waits and resumes. Reduce batch size or increase `RATE_LIMIT_PER_MINUTE` if your API plan allows.
+- Large files: Default max is 100MB. Increase `MAX_VIDEO_SIZE_MB` if you need to.
+
+## Tech Stack
+
+- Next.js 14 (App Router), React 18
 - TailwindCSS
-- Firebase Auth, Storage, and Database
-- Multiple AI endpoints including OpenAI, Anthropic, and Replicate using Vercel's AI SDK
+- Google Gemini (`@google/generative-ai`)

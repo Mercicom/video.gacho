@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverComponentsExternalPackages: ['@google/generative-ai'],
+  },
   images: {
     remotePatterns: [
       {
@@ -32,6 +35,7 @@ const nextConfig = {
       },
     ];
   },
+  // API routes are handled in individual route files with body parser configs
 };
 
 export default nextConfig;

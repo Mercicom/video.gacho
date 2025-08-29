@@ -42,6 +42,14 @@ export default function Home() {
             Firebase integration for storage, and a clean, simple interface built with Next.js.
           </p>
         </div>
+        <Link href="/video-analyzer" className="block">
+          <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors h-full">
+            <h3 className="text-xl font-semibold">Video Analyzer</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Analyze videos in bulk to extract visual hooks, text hooks, voice hooks, scripts, and pain points using AI-powered insights.
+            </p>
+          </div>
+        </Link>
       </div>
     </main>
   );
