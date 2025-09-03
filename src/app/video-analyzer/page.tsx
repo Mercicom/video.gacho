@@ -82,10 +82,15 @@ export default function VideoAnalyzerPage() {
   });
   
   const [sessionId, setSessionId] = useState<string>("");
+  const [isClient, setIsClient] = useState(false);
+  
   useEffect(() => {
+    // Mark as client-side to prevent hydration mismatches
+    setIsClient(true);
+    
     // Get or create session ID for persistence (client-only)
     try {
-      const existing = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.SESSION_ID) : null;
+      const existing = localStorage.getItem(STORAGE_KEYS.SESSION_ID);
       if (existing) {
         setSessionId(existing);
         return;
@@ -95,11 +100,13 @@ export default function VideoAnalyzerPage() {
       setSessionId(newId);
     } catch (err) {
       // ignore storage errors in non-browser environments
+      console.warn('Storage not available:', err);
     }
   }, []);
 
   // Persistent storage helpers
   const saveToStorage = useCallback(() => {
+    if (!isClient) return; // Don't save during SSR
     try {
       localStorage.setItem(STORAGE_KEYS.ANALYSIS_RESULTS, JSON.stringify(analysisResults));
       localStorage.setItem(STORAGE_KEYS.QUEUE_STATUS, JSON.stringify(queueStatus));
@@ -109,9 +116,10 @@ export default function VideoAnalyzerPage() {
     } catch (error) {
       console.warn('Failed to save to localStorage:', error);
     }
-  }, [analysisResults, queueStatus, rateLimitInfo, processingStats, analysisOptions]);
+  }, [isClient, analysisResults, queueStatus, rateLimitInfo, processingStats, analysisOptions]);
 
   const loadFromStorage = useCallback(() => {
+    if (!isClient) return; // Don't load during SSR
     try {
       const savedResults = localStorage.getItem(STORAGE_KEYS.ANALYSIS_RESULTS);
       const savedQueueStatus = localStorage.getItem(STORAGE_KEYS.QUEUE_STATUS);
@@ -155,13 +163,14 @@ export default function VideoAnalyzerPage() {
     } catch (error) {
       console.warn('Failed to load from localStorage:', error);
     }
-  }, []);
+  }, [isClient]);
 
   const clearStorage = useCallback(() => {
+    if (!isClient) return; // Don't clear during SSR
     Object.values(STORAGE_KEYS).forEach(key => {
       localStorage.removeItem(key);
     });
-  }, []);
+  }, [isClient]);
 
   // Load from storage on component mount
   useEffect(() => {

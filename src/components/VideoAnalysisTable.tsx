@@ -17,6 +17,7 @@ import {
   EyeOff
 } from "lucide-react";
 import { VideoAnalysisResult, VideoAnalysisTableProps } from "@/types/video-analysis";
+import ClientOnly from "./ClientOnly";
 
 type SortField = 'filename' | 'status' | 'processingTime' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
@@ -218,12 +219,16 @@ export default function VideoAnalysisTable({
   };
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(date));
+    return (
+      <ClientOnly fallback={<span className="text-gray-400">Loading...</span>}>
+        {new Intl.DateTimeFormat('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(new Date(date))}
+      </ClientOnly>
+    );
   };
 
   if (results.length === 0) {
