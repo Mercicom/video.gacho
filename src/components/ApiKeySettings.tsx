@@ -101,7 +101,7 @@ export default function ApiKeySettings({ isOpen, onClose, onSave, currentKey }: 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h3 className="font-semibold text-blue-900 mb-2">Why do I need an API key?</h3>
             <p className="text-sm text-blue-800 mb-3">
-              This application uses Google's Gemini AI to analyze videos. To use it, you need your own free API key from Google.
+              This application uses Google&apos;s Gemini AI to analyze videos. To use it, you need your own free API key from Google.
               Each user provides their own key, which means:
             </p>
             <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
@@ -118,8 +118,8 @@ export default function ApiKeySettings({ isOpen, onClose, onSave, currentKey }: 
             <ol className="text-sm text-gray-700 space-y-2 list-decimal list-inside mb-4">
               <li>Visit Google AI Studio (link below)</li>
               <li>Sign in with your Google account</li>
-              <li>Click "Get API Key" or "Create API Key"</li>
-              <li>Copy the key (starts with "AIza...")</li>
+              <li>Click &quot;Get API Key&quot; or &quot;Create API Key&quot;</li>
+              <li>Copy the key (starts with &quot;AIza...&quot;)</li>
               <li>Paste it in the field below</li>
             </ol>
             <a
@@ -190,8 +190,8 @@ export default function ApiKeySettings({ isOpen, onClose, onSave, currentKey }: 
               Your API key is secure
             </h3>
             <p className="text-sm text-green-800">
-              Your API key is stored only in your browser's local storage and is never sent to our servers.
-              It's only used to communicate directly with Google's Gemini API.
+              Your API key is stored only in your browser&apos;s local storage and is never sent to our servers.
+              It&apos;s only used to communicate directly with Google&apos;s Gemini API.
             </p>
           </div>
 

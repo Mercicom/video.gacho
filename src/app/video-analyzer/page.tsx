@@ -267,6 +267,7 @@ export default function VideoAnalyzerPage() {
 
     // Start processing
     processNextVideo();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uploadedVideos, rateLimitInfo.maxRequestsPerMinute, apiKey]);
 
   // Enhanced process videos with better queue management for large batches
@@ -467,6 +468,7 @@ export default function VideoAnalyzerPage() {
       : 60000; // Wait full minute if no requests remaining
     
     processingTimeout.current = setTimeout(processNextVideo, delay);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uploadedVideos, analysisOptions, rateLimitInfo, apiKey]);
 
   // Queue control handlers
