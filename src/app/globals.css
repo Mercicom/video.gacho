@@ -19,6 +19,14 @@
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-start-rgb));
+  font-feature-settings: "kern" 1, "liga" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scrolling for anchor links */
+html {
+  scroll-behavior: smooth;
 }
 
 @layer utilities {
@@ -44,5 +52,26 @@ body {
     word-break: break-word;
     line-height: 1.5;
     max-height: 4.5em; /* 3 lines * 1.5 line-height */
+  }
+
+  /* Minimalist button hover effects */
+  .btn-hover-scale {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .btn-hover-scale:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Sleek gradient backgrounds */
+  .gradient-blue-purple {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  }
+
+  /* Elegant focus states */
+  .focus-elegant:focus {
+    outline: 2px solid rgb(59, 130, 246);
+    outline-offset: 2px;
   }
 }

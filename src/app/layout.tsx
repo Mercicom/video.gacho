@@ -1,4 +1,10 @@
 import "./globals.css";
+import Header from "@/components/Header";
+
+export const metadata = {
+  title: "Creative Production Suite",
+  description: "AI-powered tools for creative production, strategy analysis, and performance marketing",
+};
 
 export default function RootLayout({
   children,
@@ -7,7 +13,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Header />
+        {children}
+      </body>
     </html>
   );
 }

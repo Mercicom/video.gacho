@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { 
   ChevronDown, 
   ChevronRight, 
@@ -14,10 +14,13 @@ import {
   ArrowUp,
   ArrowDown,
   Eye,
-  EyeOff
+  EyeOff,
+  Sheet,
+  ExternalLink
 } from "lucide-react";
 import { VideoAnalysisResult, VideoAnalysisTableProps } from "@/types/video-analysis";
 import ClientOnly from "./ClientOnly";
+import { initializeGoogleAuth } from "@/lib/utils/googleSheetsAuth";
 
 type SortField = 'filename' | 'status' | 'processingTime' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
@@ -43,6 +46,16 @@ export default function VideoAnalysisTable({
   // Pagination for large datasets
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50); // Start with 50 items per page
+  
+  // Google Sheets export state
+  const [isExportingToSheets, setIsExportingToSheets] = useState(false);
+  const [sheetsExportStatus, setSheetsExportStatus] = useState<string>('');
+  const [sheetsExportUrl, setSheetsExportUrl] = useState<string>('');
+  
+  // Initialize Google Auth on component mount
+  useEffect(() => {
+    initializeGoogleAuth();
+  }, []);
 
   // Filter and sort results with pagination
   const { filteredResults, paginatedResults, totalPages, totalFilteredCount } = useMemo(() => {
@@ -167,6 +180,57 @@ export default function VideoAnalysisTable({
       ? results.filter(r => selectedRows.has(r.id))
       : filteredResults;
     onExport(format, dataToExport);
+  };
+  
+  const handleGoogleSheetsExport = async () => {
+    try {
+      setIsExportingToSheets(true);
+      setSheetsExportStatus('Preparing export...');
+      setSheetsExportUrl('');
+      
+      const dataToExport = selectedRows.size > 0 
+        ? results.filter(r => selectedRows.has(r.id))
+        : filteredResults;
+      
+      if (dataToExport.length === 0) {
+        alert('No data to export');
+        return;
+      }
+      
+      // Dynamic import to avoid loading on initial page load
+      const { exportToGoogleSheetsWithProgress } = await import('@/lib/utils/exportUtils');
+      
+      const result = await exportToGoogleSheetsWithProgress(
+        dataToExport,
+        {},
+        (progress) => {
+          setSheetsExportStatus(progress.message);
+        }
+      );
+      
+      if (result.success && result.spreadsheetUrl) {
+        setSheetsExportStatus('Export successful!');
+        setSheetsExportUrl(result.spreadsheetUrl);
+        
+        // Auto-open spreadsheet in new tab
+        window.open(result.spreadsheetUrl, '_blank');
+        
+        // Clear status after a few seconds
+        setTimeout(() => {
+          setSheetsExportStatus('');
+          setSheetsExportUrl('');
+        }, 10000);
+      } else {
+        throw new Error(result.error || 'Export failed');
+      }
+    } catch (error) {
+      console.error('Google Sheets export error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Failed to export to Google Sheets: ${errorMessage}`);
+      setSheetsExportStatus('');
+    } finally {
+      setIsExportingToSheets(false);
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -338,8 +402,49 @@ export default function VideoAnalysisTable({
             <Download className="w-4 h-4" />
             Export JSON {selectedRows.size > 0 ? `(${selectedRows.size})` : ''}
           </button>
+          <button
+            onClick={handleGoogleSheetsExport}
+            className="flex items-center gap-2 px-4 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors shadow-sm font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+            disabled={loading || isExportingToSheets}
+            title="Export directly to Google Sheets"
+          >
+            {isExportingToSheets ? (
+              <>
+                <Clock className="w-4 h-4 animate-spin" />
+                Exporting...
+              </>
+            ) : (
+              <>
+                <Sheet className="w-4 h-4" />
+                Google Sheets {selectedRows.size > 0 ? `(${selectedRows.size})` : ''}
+              </>
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Google Sheets Export Status */}
+      {(sheetsExportStatus || sheetsExportUrl) && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-medium text-green-900">{sheetsExportStatus}</p>
+              {sheetsExportUrl && (
+                <a
+                  href={sheetsExportUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 mt-2 text-sm text-green-700 hover:text-green-900 underline"
+                >
+                  Open Spreadsheet
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Results count, pagination info, and selection info */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm text-gray-600">
@@ -399,7 +504,7 @@ export default function VideoAnalysisTable({
                     className="w-4 h-4 text-blue-600 rounded border-gray-300"
                   />
                 </th>
-                <th className="w-48 px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   <button
                     onClick={() => handleSort('filename')}
                     className="flex items-center gap-1 hover:text-gray-900"
@@ -408,31 +513,13 @@ export default function VideoAnalysisTable({
                     {getSortIcon('filename')}
                   </button>
                 </th>
-                <th className="w-24 px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="w-32 px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   <button
                     onClick={() => handleSort('status')}
                     className="flex items-center gap-1 hover:text-gray-900"
                   >
                     Status
                     {getSortIcon('status')}
-                  </button>
-                </th>
-                <th className="w-72 px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Visual Hook
-                </th>
-                <th className="w-72 px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Text Hook
-                </th>
-                <th className="w-72 px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  Voice Hook
-                </th>
-                <th className="w-20 px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                  <button
-                    onClick={() => handleSort('processingTime')}
-                    className="flex items-center gap-1 hover:text-gray-900"
-                  >
-                    Time
-                    {getSortIcon('processingTime')}
                   </button>
                 </th>
                 <th className="w-24 px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -457,13 +544,14 @@ export default function VideoAnalysisTable({
                         <button
                           onClick={() => toggleRowExpansion(result.id)}
                           className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                          title="View details"
                         >
                           {expandedRows.has(result.id) ? 
                             <ChevronDown className="w-4 h-4" /> : 
                             <ChevronRight className="w-4 h-4" />
                           }
                         </button>
-                        <span className="text-sm font-semibold text-gray-800 truncate" title={result.filename}>
+                        <span className="text-sm font-medium text-gray-900 truncate" title={result.filename}>
                           {result.filename}
                         </span>
                       </div>
@@ -476,25 +564,7 @@ export default function VideoAnalysisTable({
                         </span>
                       </div>
                     </td>
-                                                              <td className="px-4 py-4 text-sm text-gray-800">
-                        <div className="max-w-xs leading-relaxed whitespace-normal break-words" title={result.visualHook || ''}>
-                          {result.visualHook || <span className="text-gray-500 italic">No data</span>}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-800">
-                        <div className="max-w-xs leading-relaxed whitespace-normal break-words" title={result.textHook || ''}>
-                          {result.textHook || <span className="text-gray-500 italic">No data</span>}
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-800">
-                        <div className="max-w-xs leading-relaxed whitespace-normal break-words" title={result.voiceHook || ''}>
-                          {result.voiceHook || <span className="text-gray-500 italic">No data</span>}
-                        </div>
-                      </td>
-                     <td className="px-4 py-4 text-sm text-gray-500 text-center">
-                       {formatProcessingTime(result.processingTime)}
-                     </td>
-                     <td className="px-4 py-4 text-sm font-medium">
+                    <td className="px-4 py-4 text-sm font-medium">
                       <div className="flex items-center gap-2">
                         {result.status === 'error' && (
                           <button
@@ -519,7 +589,7 @@ export default function VideoAnalysisTable({
                   {/* Expanded row content */}
                   {expandedRows.has(result.id) && (
                     <tr>
-                      <td colSpan={8} className="px-4 py-6 bg-gray-50">
+                      <td colSpan={4} className="px-4 py-6 bg-gray-50">
                         <div className="space-y-6">
                           {/* Full analysis details */}
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -54,7 +54,7 @@ npm run dev        # Start the server
 - Click "API Settings" to enter your Google Gemini API key
 - Upload video files (MP4, WebM, etc.)
 - Click "Analyze" and wait for results
-- Export as CSV or JSON
+- Export as CSV, JSON, or Google Sheets
 
 **That's it! 🎉 No environment variables or complex setup required.**
 
@@ -76,6 +76,18 @@ For deployment or local development, you can set these optional limits (defaults
 - `MAX_VIDEOS_PER_BATCH=500`
 
 **Note:** No `GOOGLE_API_KEY` environment variable is needed. Users enter their own keys via the UI.
+
+### Google Sheets Export (Optional)
+
+To enable direct export to Google Sheets:
+
+1. Set up OAuth 2.0 credentials in Google Cloud Console
+2. Add this environment variable:
+   ```
+   NEXT_PUBLIC_GOOGLE_SHEETS_CLIENT_ID=your_client_id.apps.googleusercontent.com
+   ```
+
+See [GOOGLE_SHEETS_SETUP.md](./GOOGLE_SHEETS_SETUP.md) for detailed setup instructions.
 
 ## 🔧 Troubleshooting
 
@@ -124,7 +136,7 @@ For deployment or local development, you can set these optional limits (defaults
 - **Complete Transcription** - Full word-by-word transcript with precise timestamps  
 - **Pain Point Analysis** - Understands what problems the video addresses
 - **Batch Processing** - Analyze multiple videos at once
-- **Export Results** - Download as CSV or JSON for further use
+- **Export Results** - Download as CSV, JSON, or directly to Google Sheets
 
 ### Built for Non-Technical Users
 - **Simple Setup** - Just run 3 commands and enter your API key

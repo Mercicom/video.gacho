@@ -1,5 +1,7 @@
 import { saveAs } from 'file-saver';
 import { VideoAnalysisResult, ExportConfig } from '@/types/video-analysis';
+import { signInWithGoogle, isAuthenticated, waitForGoogleAuth } from './googleSheetsAuth';
+import { createSpreadsheet, validateSpreadsheetData, formatSheetsError } from './googleSheetsExport';
 
 // Default export configuration
 const DEFAULT_EXPORT_CONFIG: ExportConfig = {
@@ -556,4 +558,119 @@ export function handleExportError(error: unknown): string {
   }
   
   return 'Export failed: Unknown error occurred';
+}
+
+// Google Sheets Export
+/**
+ * Export results to Google Sheets
+ * Handles authentication and spreadsheet creation
+ * 
+ * @param results - Video analysis results to export
+ * @param config - Optional export configuration
+ * @returns Promise with spreadsheet URL and success status
+ */
+export async function exportToGoogleSheets(
+  results: VideoAnalysisResult[],
+  config?: Partial<ExportConfig>
+): Promise<{ success: boolean; spreadsheetUrl?: string; error?: string }> {
+  try {
+    // Validate data first
+    const validation = validateSpreadsheetData(results);
+    if (!validation.isValid) {
+      throw new Error(validation.errors.join('; '));
+    }
+    
+    // Show warnings if any
+    if (validation.warnings.length > 0) {
+      console.warn('Export warnings:', validation.warnings);
+    }
+    
+    // Wait for Google Auth library to load
+    try {
+      await waitForGoogleAuth(5000);
+    } catch (error) {
+      throw new Error('Google authentication library failed to load. Please refresh the page and try again.');
+    }
+    
+    // Check if authenticated, if not trigger sign in
+    let accessToken: string | null = null;
+    
+    if (!isAuthenticated()) {
+      try {
+        accessToken = await signInWithGoogle();
+      } catch (authError) {
+        throw new Error(
+          authError instanceof Error 
+            ? authError.message 
+            : 'Failed to authenticate with Google. Please try again.'
+        );
+      }
+    }
+    
+    // Create spreadsheet with data
+    const result = await createSpreadsheet(results, config);
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to create spreadsheet');
+    }
+    
+    return {
+      success: true,
+      spreadsheetUrl: result.spreadsheetUrl,
+    };
+  } catch (error) {
+    console.error('Google Sheets export error:', error);
+    return {
+      success: false,
+      error: formatSheetsError(error),
+    };
+  }
+}
+
+/**
+ * Export with progress callback for large datasets
+ */
+export async function exportToGoogleSheetsWithProgress(
+  results: VideoAnalysisResult[],
+  config?: Partial<ExportConfig>,
+  onProgress?: (progress: { stage: string; message: string }) => void
+): Promise<{ success: boolean; spreadsheetUrl?: string; error?: string }> {
+  try {
+    if (onProgress) onProgress({ stage: 'validating', message: 'Validating data...' });
+    
+    const validation = validateSpreadsheetData(results);
+    if (!validation.isValid) {
+      throw new Error(validation.errors.join('; '));
+    }
+    
+    if (onProgress) onProgress({ stage: 'authenticating', message: 'Checking authentication...' });
+    
+    await waitForGoogleAuth(5000);
+    
+    if (!isAuthenticated()) {
+      if (onProgress) onProgress({ stage: 'authenticating', message: 'Please sign in with Google...' });
+      await signInWithGoogle();
+    }
+    
+    if (onProgress) onProgress({ stage: 'creating', message: 'Creating spreadsheet...' });
+    
+    const result = await createSpreadsheet(results, config);
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to create spreadsheet');
+    }
+    
+    if (onProgress) onProgress({ stage: 'complete', message: 'Export complete!' });
+    
+    return {
+      success: true,
+      spreadsheetUrl: result.spreadsheetUrl,
+    };
+  } catch (error) {
+    console.error('Google Sheets export error:', error);
+    return {
+      success: false,
+      error: formatSheetsError(error),
+    };
+  }
 } 
