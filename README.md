@@ -9,68 +9,94 @@ Extract from any video:
 - 📜 **Full Script** - Complete transcript with timestamps
 - 😤 **Pain Point** - Problems addressed and solutions positioned
 
-**Built for non-developers** - Just enter your API key and analyze videos instantly!
+**Built for non-developers** - Just get a free API key from Google and analyze videos instantly!
 
-## 🚀 Quick Start (3 Minutes Setup)
+## 🌐 Live Demo
 
-### Step 1: Get Your Copy
-1. **Fork this repository** - Click the "Fork" button at the top of this page
-2. **Download to your computer**:
-   - Click the green "Code" button on YOUR forked repository  
-   - Click "Download ZIP" and extract it
-   - OR if you have Git: `git clone https://github.com/YOUR-USERNAME/video-analyzer-public.git`
+**Try it now:** https://video-gacho.netlify.app *(URL will be updated after deployment)*
 
-### Step 2: Install Node.js (One-time setup)
-- Download and install from: https://nodejs.org 
-- Choose the LTS version (18 or newer)
-- This gives you `npm` which you'll need
+## 🚀 Two Ways to Use
 
-### Step 3: Get Your API Key
-- Go to: https://aistudio.google.com/app/apikey
-- Click "Create API Key" 
-- Copy the key (starts with `AIza...`)
+### Option A: Use the Live Website (Easiest!)
 
-### Step 4: Setup & Run
-Open your terminal/command prompt in the project folder and run:
+1. **Visit the website** (link above)
+2. **Get your free API key**:
+   - Go to: https://aistudio.google.com/app/apikey
+   - Sign in with your Google account
+   - Click "Create API Key"
+   - Copy the key (starts with `AIza...`)
+3. **Enter your API key** in the settings panel
+4. **Start analyzing** videos!
 
+Your API key is stored only in your browser and never sent to our servers.
+
+### Option B: Run Locally (For Developers)
+
+#### Step 1: Get Your Copy
+1. **Clone this repository**:
+   ```bash
+   git clone https://github.com/Mercicom/video.gacho.git
+   cd video.gacho
+   ```
+
+#### Step 2: Install Dependencies
 ```bash
 npm install        # Install dependencies (takes 1-2 minutes)
-npm run setup      # Enter your API key when prompted  
+```
+
+#### Step 3: Run Development Server
+```bash
 npm run dev        # Start the server
 ```
 
-### Step 5: Use It! 
+#### Step 4: Use It! 
 - Open: http://localhost:3000/video-analyzer
+- Click "API Settings" to enter your Google Gemini API key
 - Upload video files (MP4, WebM, etc.)
 - Click "Analyze" and wait for results
 - Export as CSV or JSON
 
-**That's it! 🎉 No coding required.**
+**That's it! 🎉 No environment variables or complex setup required.**
 
-## Environment Variables
+## How It Works
 
-Only one is required to run the Video Analyzer:
-- `GOOGLE_API_KEY` – your Gemini API key
+**User-Provided API Keys**: This application uses a unique approach where each user provides their own Google Gemini API key through the browser interface. This means:
 
-You can also set optional limits (defaults shown):
+- ✅ **Free for everyone** - Each user uses their own free Google API quota
+- ✅ **No server costs** - No shared API keys or server-side API expenses
+- ✅ **Secure** - API keys are stored only in your browser, never on our servers
+- ✅ **Private** - Each user has their own API quota and usage limits
+- ✅ **Unlimited users** - Support infinite users without additional costs
+
+## Optional Environment Variables
+
+For deployment or local development, you can set these optional limits (defaults shown):
 - `RATE_LIMIT_PER_MINUTE=10`
 - `MAX_VIDEO_SIZE_MB=100`
-- `MAX_VIDEOS_PER_BATCH=50`
+- `MAX_VIDEOS_PER_BATCH=500`
 
-See `.env.example` for a full list (other providers are optional and not needed for video analysis).
+**Note:** No `GOOGLE_API_KEY` environment variable is needed. Users enter their own keys via the UI.
 
 ## 🔧 Troubleshooting
 
 ### Common Issues
 
-**"API key not configured"**
-- Run `npm run setup` again and enter your Gemini API key
+**"API key not configured"** or **"API Key Required"**
+- Click the "API Settings" button in the top right
+- Enter your Google Gemini API key (get it from https://aistudio.google.com/app/apikey)
 - Make sure you copied the full key (starts with `AIza...`)
+- Click "Save API Key"
+
+**"Invalid API key format"**
+- Google Gemini API keys always start with `AIza`
+- Make sure you copied the entire key without spaces
+- Get a new key if yours is invalid: https://aistudio.google.com/app/apikey
 
 **"Rate limit exceeded"** 
 - The tool automatically waits and retries (this is normal!)
 - Reduce batch size if analyzing many videos
-- Free Gemini API: 15 requests per minute
+- Free Gemini API: 15 requests per minute per user
+- Each user has their own quota
 
 **"File too large"**
 - Default limit: 100MB per video
