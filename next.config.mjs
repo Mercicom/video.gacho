@@ -27,14 +27,8 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: "https://api.openai.com/:path*",
-      },
-    ];
-  },
+  // Rewrites removed - was redirecting all /api/* to OpenAI (incorrect)
+  // API routes should be handled by Next.js normally
   // API routes are handled in individual route files with body parser configs
 };
 
