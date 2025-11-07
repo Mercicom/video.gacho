@@ -8,6 +8,8 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  # Disable secrets scanning for public OAuth Client ID (not a secret)
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_GOOGLE_SHEETS_CLIENT_ID"
 
 # Note: API routes and redirects are automatically handled by @netlify/plugin-nextjs
 # No manual configuration needed for Next.js App Router routes
